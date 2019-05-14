@@ -1,23 +1,16 @@
-# Omniauth Elitmus
+# Omniauth Client
 
-[![Build Status](https://travis-ci.org/elitmus/omniauth-elitmus.svg?branch=master)](https://travis-ci.org/elitmus/omniauth-elitmus)
 
-[![Code Climate](https://codeclimate.com/github/elitmus/omniauth-elitmus/badges/gpa.svg)](https://codeclimate.com/github/elitmus/omniauth-elitmus)
+## Generic Client OAuth2 Strategy for OmniAuth
 
-[![Test Coverage](https://codeclimate.com/github/elitmus/omniauth-elitmus/badges/coverage.svg)](https://codeclimate.com/github/elitmus/omniauth-elitmus)
-
-[![Gem Version](https://badge.fury.io/rb/omniauth-elitmus.svg)](http://badge.fury.io/rb/omniauth-elitmus)
-
-## eLitmus OAuth2 Strategy for OmniAuth
-
-This is official OmniAuth strategy for authenticating to eLitmus.com. To use it, you'll need to register your consumer application on elitmus.com to get pair of OAuth2 Application ID and Secret.   It supports the OAuth 2.0 server-side and client-side flows for 3rd party OAuth consumer applications 
+This is Generic OmniAuth strategy to authenticate with multiple clients under same provider name with dynamic configurations
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'omniauth-elitmus'
+gem 'omniauth-client'
 ```
 
 And then execute:
@@ -26,18 +19,16 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install omniauth-elitmus
+    $ gem install omniauth-client
 
 ## Usage
 
-OmniAuth::Strategies::Elitmus is simply a Rack middleware.
-
- First, register your application at 'www.elitmus.com/oauth/applications' with valid callback url to get app_id and secret (elitmus.com uses callback url to redirect to your app). Create environement variables 'ELITMUS_KEY', 'ELITMUS_SECRET' to store your app_id, secret respectively. Here's a quick example, adding the middleware to a Rails app in config/initializers/omniauth.rb.
+OmniAuth::Strategies::Client is simply a Rack middleware.
 
 
 ```ruby
 Rails.application.config.middleware.use OmniAuth::Builder do
-  provider :elitmus, ENV['ELITMUS_KEY'], ENV['ELITMUS_SECRET']
+  provider :client, ENV['CLIENT_KEY'], ENV['CLIENT_SECRET'], :client_options => { :site => CLIENT_OPTIONS['site'] }, :api_path => CLIENT_OPTIONS['api_path']
 end
 ```
 
@@ -49,39 +40,20 @@ Option name | Default | Explanation
 --- | --- | ---
 `scope` | `public` | lets you set scope to provide granular access to different types of data. If not provided, scope defaults to 'public' for users. you can use any one of "write", "public" and "admin" values for scope.
 `auth_type` | nil | Optionally specifies the requested authentication feature. Valid value is 'reauthenticate' (asks the user to re-authenticate unconditionally). If not specified, default value is nil. (reuses the existing session of last authenticated user if any).
-`callback_path` | '/auth/:provider/callback' | Specify a custom callback URL used during the server-side flow. Note this must be same as specified at the time of your applicaiton registration at www.elitmus.com/oauth/applications. Execution flow returns back to this point at consumer application after authencitcation flow finishes at server-side. If not specified, default is '/auth/:provider/callback'. Make an entry for this end point in config/routes.rb of your consumer application. Strategy automatically replaces ':provider' by provider name as specified in config/initializers/omniauth.rb.
+`callback_path` | '/auth/client/callback' | Provider has been fixed as client hence this cannot be modified
+`api_path` | nil | This is the path which the gem is going to hit on client server to extract User data
 
-### Examples 
+### Examples
 
-#### scope
-
-```ruby
-Rails.application.config.middleware.use OmniAuth::Builder do
-  provider :elitmus, ENV['ELITMUS_KEY'], ENV['ELITMUS_SECRET'], { :scope => "admin" }
-end
-```
-If not specified, default scope is 'public'
-
-#### auth_type
+#### api_path
 
 ```ruby
 Rails.application.config.middleware.use OmniAuth::Builder do
-  provider :elitmus, ENV['ELITMUS_KEY'], ENV['ELITMUS_SECRET'], 
-  		{ :scope => "admin", :authorize_params => { :auth_type => "reauthenticate" }}
+  provider :elitmus, ENV['CLIENT_KEY'], ENV['CLIENT_SECRET'],
+      { :scope => "admin", :authorize_params => { :auth_type => "reauthenticate" },
+        :api_path => '/api/v1/user_info' }
 end
 ```
-If not specified, default is nil.
-
-#### callback_path
-
-```ruby
-Rails.application.config.middleware.use OmniAuth::Builder do
-  provider :elitmus, ENV['ELITMUS_KEY'], ENV['ELITMUS_SECRET'], 
-      { :scope => "admin", :authorize_params => { :auth_type => "reauthenticate" }, 
-        :callback_path => '/your/custom/callback/path'}
-end
-```
-If not specified, default callback_path is '/auth/:provider/callback'.Here, finally it would be '/auth/elitmus/callback' as per explained in configuration table.
 
 ## Auth Hash
 
@@ -89,7 +61,7 @@ Here's an example *Auth Hash* available in `request.env['omniauth.auth']`:
 
 ```ruby
 {
-  :provider => 'elitmus',
+  :provider => 'client',
   :uid => '98979695',
   :info => {
     :email => 'kishoredaa@evergreen.com',
@@ -119,7 +91,7 @@ Here's an example *Auth Hash* available in `request.env['omniauth.auth']`:
 
 ## Contributing
 
-1. Fork it ( https://github.com/[my-github-username]/omniauth-elitmus/fork )
+1. Fork it ( https://github.com/[my-github-username]/omniauth-client/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
